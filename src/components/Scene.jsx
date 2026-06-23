@@ -68,15 +68,16 @@ export default function Scene() {
   const { progress } = useScrollStore();
   const { camera } = useThree();
 
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const torusRef = useRef();
   const sphereRef = useRef();
-  const relicRef = useRef();
+  const relicSolidRef = useRef();
+  const relicWireRef = useRef();
   const ringsRef = useRef();
   const booksRef = useRef([]);
   const buildingsRef = useRef([]);
   const beamsRef = useRef([]);
   const galaxyRef = useRef();
-  const fogRef = useRef();
   const ambientRef = useRef();
   const keyLightRef = useRef();
   const rimLightRef = useRef();
@@ -123,16 +124,18 @@ export default function Scene() {
     const ci = Math.floor(Math.min(raw, S - 1));
     const cf = raw - ci;
     const ni = Math.min(ci + 1, S);
-    const ease = cf * cf * (3 - 2 * cf);
 
-    camera.position.x = lerp(CAM[ci][0], CAM[ni][0], ease);
-    camera.position.y = lerp(CAM[ci][1], CAM[ni][1], ease);
-    camera.position.z = lerp(CAM[ci][2], CAM[ni][2], ease);
-    camera.lookAt(
-      lerp(TGT[ci][0], TGT[ni][0], ease),
-      lerp(TGT[ci][1], TGT[ni][1], ease),
-      lerp(TGT[ci][2], TGT[ni][2], ease)
-    );
+    if (!prefersReduced) {
+      const ease = cf * cf * (3 - 2 * cf);
+      camera.position.x = lerp(CAM[ci][0], CAM[ni][0], ease);
+      camera.position.y = lerp(CAM[ci][1], CAM[ni][1], ease);
+      camera.position.z = lerp(CAM[ci][2], CAM[ni][2], ease);
+      camera.lookAt(
+        lerp(TGT[ci][0], TGT[ni][0], ease),
+        lerp(TGT[ci][1], TGT[ni][1], ease),
+        lerp(TGT[ci][2], TGT[ni][2], ease)
+      );
+    }
 
     const t = state.clock.elapsedTime;
 
@@ -140,34 +143,51 @@ export default function Scene() {
       return Math.max(0, 1 - Math.abs(raw - center) / width);
     }
 
-    // Torus knot — section 0-1
+    if (!prefersReduced) {
+      if (torusRef.current) {
+        torusRef.current.rotation.x += delta * 0.08;
+        torusRef.current.rotation.y += delta * 0.12;
+      }
+      if (sphereRef.current) {
+        sphereRef.current.rotation.y += delta * 0.04;
+      }
+      if (relicSolidRef.current) {
+        relicSolidRef.current.rotation.y += delta * 0.18;
+        relicSolidRef.current.rotation.x = Math.sin(t * 0.3) * 0.08;
+      }
+      if (relicWireRef.current) {
+        relicWireRef.current.rotation.y -= delta * 0.1;
+      }
+      if (ringsRef.current) {
+        ringsRef.current.rotation.y += delta * 0.1;
+      }
+      if (galaxyRef.current) {
+        galaxyRef.current.rotation.y += delta * 0.04;
+      }
+    }
+
     if (torusRef.current) {
-      torusRef.current.rotation.x += delta * 0.08;
-      torusRef.current.rotation.y += delta * 0.12;
       const vis = fadeInOut(0.3, 0.8);
       torusRef.current.material.opacity = vis * 0.25;
     }
 
-    // Sphere — sections 2-3
     if (sphereRef.current) {
-      sphereRef.current.rotation.y += delta * 0.04;
       const vis = fadeInOut(2.5, 1);
       sphereRef.current.material.opacity = vis * 0.7;
       sphereRef.current.material.emissiveIntensity = vis * 0.15;
     }
 
-    // Relic — sections 4-6
-    if (relicRef.current) {
-      relicRef.current.rotation.y += delta * 0.18;
-      relicRef.current.rotation.x = Math.sin(t * 0.3) * 0.08;
+    if (relicSolidRef.current) {
       const vis = fadeInOut(4.5, 1.5);
-      relicRef.current.material.opacity = vis;
-      relicRef.current.material.emissiveIntensity = vis * 0.25;
+      relicSolidRef.current.material.opacity = vis;
+      relicSolidRef.current.material.emissiveIntensity = vis * 0.25;
+    }
+    if (relicWireRef.current) {
+      const vis = fadeInOut(4.5, 1.5);
+      relicWireRef.current.material.opacity = vis * 0.2;
     }
 
-    // Rings — section 2-4
     if (ringsRef.current) {
-      ringsRef.current.rotation.y += delta * 0.1;
       ringsRef.current.children.forEach((c, i) => {
         c.children.forEach(p => {
           if (p.material) p.material.opacity = fadeInOut(2.8 + i * 0.3, 1.2) * 0.4;
@@ -175,44 +195,37 @@ export default function Scene() {
       });
     }
 
-    // Books — section 1-3
-    booksRef.current.forEach((book, i) => {
+    booksRef.current.forEach((book) => {
       if (!book) return;
       const vis = fadeInOut(1.8, 1.2);
       book.material.opacity = vis * 0.6;
     });
 
-    // City — section 3-5
     buildingsRef.current.forEach((b) => {
       if (!b) return;
-      const vis = fadeInOut(3.8, 1.2);
-      b.material.opacity = vis * 0.5;
+      b.material.opacity = fadeInOut(3.8, 1.2) * 0.5;
     });
     beamsRef.current.forEach((b) => {
       if (!b) return;
       b.material.opacity = fadeInOut(3.8, 1.2) * 0.15;
     });
 
-    // Galaxy — section 5-6
     if (galaxyRef.current) {
-      galaxyRef.current.rotation.y += delta * 0.04;
       const vis = fadeInOut(5.5, 1);
       galaxyRef.current.material.opacity = vis * 0.7;
     }
 
-    // Fog
     if (state.scene.fog) {
       state.scene.fog.density = 0.02 + raw * 0.005;
       state.scene.fog.color.setHex(0x05070B);
     }
 
-    // Lighting
     if (ambientRef.current) ambientRef.current.intensity = 0.06 + raw * 0.015;
     if (keyLightRef.current) {
-      keyLightRef.current.intensity = 0.15 + Math.sin(t * 0.15) * 0.05 + raw * 0.02;
+      keyLightRef.current.intensity = 0.15 + (!prefersReduced ? Math.sin(t * 0.15) * 0.05 : 0) + raw * 0.02;
     }
     if (rimLightRef.current) {
-      rimLightRef.current.intensity = 0.3 + Math.sin(t * 0.2 + 1) * 0.1 + raw * 0.03;
+      rimLightRef.current.intensity = 0.3 + (!prefersReduced ? Math.sin(t * 0.2 + 1) * 0.1 : 0) + raw * 0.03;
     }
   });
 
@@ -230,7 +243,7 @@ export default function Scene() {
       <Float speed={0.4} rotationIntensity={0.08} floatIntensity={0.2}>
         <mesh ref={torusRef} position={[0, 0.5, -3]}>
           <torusKnotGeometry args={[1.2, 0.4, 120, 16]} />
-          <meshStandardMaterial color={COLORS.gold} metalness={0.8} roughness={0.1} transparent depthWrite={false} />
+          <meshStandardMaterial color={COLORS.gold} metalness={0.8} roughness={0.1} transparent />
         </mesh>
       </Float>
 
@@ -241,13 +254,13 @@ export default function Scene() {
       </mesh>
 
       {/* Relic */}
-      <mesh ref={relicRef} position={[0, 0.3, 0]}>
+      <mesh ref={relicSolidRef} position={[0, 0.3, 0]}>
         <icosahedronGeometry args={[0.45, 1]} />
         <meshStandardMaterial color={COLORS.gold} metalness={0.9} roughness={0.1} emissive={COLORS.gold} transparent />
       </mesh>
-      <mesh ref={relicRef} position={[0, 0.3, 0]} scale={1.3}>
+      <mesh ref={relicWireRef} position={[0, 0.3, 0]} scale={1.3}>
         <icosahedronGeometry args={[0.45, 0]} />
-        <meshStandardMaterial color={COLORS.cyan} metalness={0.5} roughness={0.3} transparent opacity={0} wireframe />
+        <meshStandardMaterial color={COLORS.cyan} metalness={0.5} roughness={0.3} transparent wireframe />
       </mesh>
 
       {/* Rings */}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { COLORS, CHAPTERS } from '../constants/brand';
+import { useScrollStore } from '../stores/scroll';
 
 const linkBase = {
   color: COLORS.ivory,
@@ -18,22 +19,18 @@ const linkBase = {
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const handle = () => {
-      setScrolled(window.scrollY > 80);
-      const sections = document.querySelectorAll('[data-section]');
-      let cur = 0;
-      sections.forEach((s, i) => {
-        const r = s.getBoundingClientRect();
-        if (r.top < window.innerHeight * 0.4) cur = i;
-      });
-      setActive(cur);
-    };
+    const handle = () => setScrolled(window.scrollY > 80);
     window.addEventListener('scroll', handle, { passive: true });
     return () => window.removeEventListener('scroll', handle);
   }, []);
+
+  const section = useScrollStore((s) => s.section);
+  const scrollTo = (i) => {
+    const el = document.querySelector(`[data-section="${i}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <nav
@@ -60,11 +57,8 @@ export default function Navigation() {
         {CHAPTERS.map((ch, i) => (
           <button
             key={ch.id}
-            onClick={() => {
-              const el = document.querySelector(`[data-section="${i}"]`);
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-            style={{ ...linkBase, opacity: active === i ? 1 : 0.3 }}
+            onClick={() => scrollTo(i)}
+            style={{ ...linkBase, opacity: section === i ? 1 : 0.3 }}
           >
             {ch.title}
           </button>
