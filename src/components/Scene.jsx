@@ -133,10 +133,10 @@ export default function MythSceneSSS() {
     '(prefers-reduced-motion: reduce)',
   ).matches;
   const { progress } = useScrollStore();
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
 
-  camera.toneMapping = THREE.ACESFilmicToneMapping;
-  camera.toneMappingExposure = 1.2;
+  gl.toneMapping = THREE.ACESFilmicToneMapping;
+  gl.toneMappingExposure = 1.2;
   // Refs
   const ambientRef = useRef();
   const keyLightRef = useRef();
