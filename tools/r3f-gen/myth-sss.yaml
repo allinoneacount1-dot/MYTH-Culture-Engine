@@ -1,0 +1,161 @@
+name: MythSceneSSS
+store: ../stores/scroll
+toneMapping: { exposure: 1.2 }
+environment: { preset: "studio", background: false, blur: 0.3 }
+fog: { color: "#05070B", density: 0.008, type: exp2 }
+bloom: { intensity: 0.4, threshold: 0.05, mipmapBlur: true }
+vignette: { offset: 0.25, darkness: 0.6 }
+softShadows: { yOffset: -0.4, opacity: 0.5, scale: 12, blur: 4, far: 6 }
+ambient: { intensity: 0.08, color: "#F7F4EE" }
+keyLight: { position: [8, 12, 6], intensity: 0.3, color: "#D8B36A" }
+rimLight: { position: [-6, 4, -8], intensity: 0.4, color: "#3AE9E0" }
+hemisphere: { skyColor: "#1a2a4a", groundColor: "#0a0a12", intensity: 0.25 }
+extraLights:
+  - { position: [0, -5, 8], intensity: 0.12, color: "#A33A4A" }
+camera:
+  keyframes:
+    - { at: 0, pos: [0, 1.8, 12], target: [0, 0, 0] }
+    - { at: 0.15, pos: [5, 2, 16], target: [-1.5, 0.5, -1] }
+    - { at: 0.3, pos: [0, 1, 10], target: [0, 0.5, 0] }
+    - { at: 0.45, pos: [-6, 3, 15], target: [0, 0, 0] }
+    - { at: 0.6, pos: [0, 8, 20], target: [0, -0.5, 0] }
+    - { at: 0.8, pos: [0, 1.5, 7], target: [0, 0.8, 0] }
+    - { at: 1, pos: [0, 0.3, 4], target: [0, 0, 0] }
+objects:
+  # ——— SSS FLOOR ——— reflective mirror ground
+  - type: reflectiveFloor
+    args: [25, 25]
+    position: [0, -0.6, 0]
+    color: "#0a0d14"
+    metalness: 0.95
+    roughness: 0.05
+    mixBlur: 0.6
+    mixStrength: 0.9
+    blur: [1024, 1024]
+    resolution: 1024
+
+  # ——— TORUS KNOT (Hero) ——— MeshPhysical + clearcoat + envMap
+  - type: torusKnot
+    args: [1.4, 0.45, 256, 32]
+    position: [0, 0.6, -3.5]
+    material:
+      type: physical
+      color: "#D8B36A"
+      metalness: 0.9
+      roughness: 0.06
+      emissive: "#D8B36A"
+      emissiveIntensity: 0.15
+      clearcoat: 1.0
+      clearcoatRoughness: 0.1
+      envMapIntensity: 2.0
+      anisotropy: 0.5
+    animation: { rotateY: 0.08, rotateX: 0.05, float: true, floatSpeed: 0.5, rotationIntensity: 0.1, floatIntensity: 0.3 }
+    visibility: { center: 0.3, width: 0.8 }
+
+  # ——— SPHERE (Ch2) ——— MeshPhysical + clearcoat + transmission
+  - type: sphere
+    args: [0.6, 64, 64]
+    position: [0, 0, 0]
+    material:
+      type: physical
+      color: "#D8B36A"
+      metalness: 0.95
+      roughness: 0.03
+      emissive: "#D8B36A"
+      emissiveIntensity: 0.1
+      clearcoat: 0.8
+      clearcoatRoughness: 0.05
+      envMapIntensity: 2.5
+      ior: 1.5
+      transmission: 0.1
+    glow: { color: "#D8B36A", intensity: 1.0, scale: 1.2 }
+    animation: { rotateY: 0.03, breathe: true }
+    visibility: { center: 2.5, width: 1.2 }
+
+  # ——— PARTICLE RING 1 ——— cyan, dense
+  - type: particleRing
+    radius: 2.0
+    count: 200
+    color: "#3AE9E0"
+    speed: 0.12
+    spread: 0.15
+    opacity: 0.7
+    size: 0.025
+
+  # ——— PARTICLE RING 2 ——— gold, sparse
+  - type: particleRing
+    radius: 3.2
+    count: 150
+    color: "#D8B36A"
+    speed: -0.08
+    spread: 0.25
+    opacity: 0.6
+    size: 0.03
+
+  # ——— RELIC (Ch4-6) ——— MeshPhysical + anisotropy
+  - type: relic
+    args: [0.5, 3]
+    position: [0, 0.4, 0]
+    solid:
+      material:
+        type: physical
+        color: "#D8B36A"
+        metalness: 0.95
+        roughness: 0.04
+        emissive: "#D8B36A"
+        emissiveIntensity: 0.3
+        clearcoat: 1.0
+        clearcoatRoughness: 0.08
+        envMapIntensity: 2.0
+        anisotropy: 0.8
+        anisotropyRotation: 0.5
+    wireframe:
+      material: { color: "#3AE9E0", metalness: 0.5, roughness: 0.3 }
+      opacity: 0.3
+      scale: 1.6
+    glow: { color: "#D8B36A", intensity: 1.5, scale: 1.4 }
+    animation: { rotateY: 0.15, breathe: true }
+    visibility: { center: 4.5, width: 1.5 }
+
+  # ——— GLYPHS (Ch4-6) ——— 8 orbiting symbols
+  - type: glyphs
+    count: 8
+    orbit: { radius: [1.8, 3.5], speed: 0.1 }
+    colors: ["#D8B36A", "#3AE9E0", "#A33A4A", "#F7F4EE"]
+    visibility: { center: 4.8, width: 1.8 }
+
+  # ——— TOWERS (Ch3-5) ——— denser, taller
+  - type: towers
+    area: { x: [-5, 5, 0.6], z: [-4, 4, 0.6] }
+    density: 0.6
+    height: [0.15, 1.2]
+    colors: ["#10213A", "#F7F4EE", "#D8B36A", "#3AE9E0"]
+    visibility: { center: 3.8, width: 1.2 }
+
+  # ——— GALAXY (Ch5-6) ——— 8000 particles
+  - type: galaxy
+    count: 8000
+    arms: 4
+    size: 0.018
+    visibility: { center: 5.5, width: 1 }
+
+  # ——— LIGHT SHAFTS ——— volumetric cones
+  - type: lightShaft
+    count: 5
+    colors: ["#D8B36A", "#3AE9E0", "#A33A4A", "#D8B36A", "#3AE9E0"]
+    positions: [[0, 2.5, -1.5], [2, 2.5, -1], [-2, 2.5, -1], [1, 2.5, 1], [-1, 2.5, 1]]
+    opacity: 0.08
+
+  # ——— DUST ——— 1500 particles, wider area
+  - type: dust
+    count: 1500
+    size: 0.008
+    color: "#F7F4EE"
+    area: { x: 40, y: 20, z: 45 }
+
+  # ——— STARS ——— 5000 stars
+  - type: stars
+    count: 5000
+    radius: 60
+    depth: 70
+    factor: 4

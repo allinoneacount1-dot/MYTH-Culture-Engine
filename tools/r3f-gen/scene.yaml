@@ -1,0 +1,38 @@
+# R3F Scene Config — sample
+name: MyScene
+camera:
+  keyframes:
+    - { at: 0, pos: [0, 1.5, 10], target: [0, 0, 0] }
+    - { at: 0.5, pos: [0, 0.5, 6], target: [0, 0, 0] }
+    - { at: 1, pos: [0, 0, 3], target: [0, 0, 0] }
+fog: { color: "#05070B", density: 0.015, type: exp2 }
+bloom: { intensity: 0.5, threshold: 0.1, mipmapBlur: true }
+objects:
+  - type: torusKnot
+    args: [1.2, 0.4, 180, 24]
+    position: [0, 0.5, -3]
+    material: { color: "#D8B36A", metalness: 0.85, roughness: 0.08, emissive: "#D8B36A" }
+    animation: { rotateY: 0.12, rotateX: 0.08, float: true }
+    visibility: { center: 0.3, width: 0.8 }
+  - type: sphere
+    args: [0.55, 48, 48]
+    position: [0, 0, 0]
+    material: { color: "#D8B36A", metalness: 0.9, roughness: 0.05, emissive: "#D8B36A" }
+    glow: { color: "#D8B36A", intensity: 0.8, scale: 1.15 }
+    animation: { breathe: true }
+    visibility: { center: 2.5, width: 1 }
+  - type: particleRing
+    radius: 1.8
+    count: 100
+    color: "#3AE9E0"
+    speed: 0.15
+    spread: 0.2
+  - type: particleRing
+    radius: 2.8
+    count: 120
+    color: "#D8B36A"
+    speed: -0.1
+    spread: 0.3
+  - type: dust
+    count: 800
+    size: 0.012

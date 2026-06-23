@@ -1,0 +1,26 @@
+{
+  "name": "r3f-gen",
+  "version": "1.0.0",
+  "description": "Generate React Three Fiber Scene components from YAML/JSON config",
+  "main": "src/index.js",
+  "bin": {
+    "r3f-gen": "src/index.js"
+  },
+  "scripts": {
+    "build": "node src/index.js build scene.yaml"
+  },
+  "keywords": [
+    "r3f",
+    "threejs",
+    "react-three-fiber",
+    "generator"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "commander": "^15.0.0",
+    "js-yaml": "^5.1.0",
+    "prettier": "^3.8.4"
+  }
+}
