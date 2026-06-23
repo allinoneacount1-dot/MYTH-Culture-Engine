@@ -1,7 +1,13 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Float } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import {
+  Float,
+  Stars,
+  MeshReflectorMaterial,
+  Environment,
+  ContactShadows,
+} from '@react-three/drei';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { useScrollStore } from '../stores/scroll';
 
@@ -104,82 +110,87 @@ function ParticleRing({
 }
 
 const CAM = [
-  [0, 1.5, 10],
-  [4, 1.5, 14],
-  [0, 0.8, 9],
-  [-5, 2.5, 13],
-  [0, 7, 16],
-  [0, 1, 6],
-  [0, 0.2, 3.5],
+  [0, 1.8, 12],
+  [5, 2, 16],
+  [0, 1, 10],
+  [-6, 3, 15],
+  [0, 8, 20],
+  [0, 1.5, 7],
+  [0, 0.3, 4],
 ];
 const TGT = [
   [0, 0, 0],
-  [-1, 0, -1],
-  [0, 0.3, 0],
-  [0, 0, 0],
-  [0, -1, 0],
+  [-1.5, 0.5, -1],
   [0, 0.5, 0],
+  [0, 0, 0],
+  [0, -0.5, 0],
+  [0, 0.8, 0],
   [0, 0, 0],
 ];
 
-export default function MythScene() {
+export default function MythSceneSSS() {
   const prefersReduced = window.matchMedia(
     '(prefers-reduced-motion: reduce)',
   ).matches;
   const { progress } = useScrollStore();
   const { camera } = useThree();
 
+  camera.toneMapping = THREE.ACESFilmicToneMapping;
+  camera.toneMappingExposure = 1.2;
   // Refs
   const ambientRef = useRef();
   const keyLightRef = useRef();
   const rimLightRef = useRef();
-  const torusRef_0 = useRef();
-  const sphereRef_1 = useRef();
-  const sphereGlowRef_1 = useRef();
-  const relicSolidRef_4 = useRef();
-  const relicWireRef_4 = useRef();
-  const relicGlowRef_4 = useRef();
-  const galaxyRef_7 = useRef();
-  const dustRef_9 = useRef();
-  const glyphRefs_5 = useRef([]);
-  const towerRefs_6 = useRef([]);
-  const towerGlowRefs_6 = useRef([]);
+  const floorRef_0 = useRef();
+  const torusRef_1 = useRef();
+  const sphereRef_2 = useRef();
+  const sphereGlowRef_2 = useRef();
+  const relicSolidRef_5 = useRef();
+  const relicWireRef_5 = useRef();
+  const relicGlowRef_5 = useRef();
+  const galaxyRef_8 = useRef();
+  const dustRef_10 = useRef();
+  const glyphRefs_6 = useRef([]);
+  const towerRefs_7 = useRef([]);
+  const towerGlowRefs_7 = useRef([]);
 
   // Memoized data
 
-  const glyphData_5 = useMemo(
+  const glyphData_6 = useMemo(
     () =>
-      Array.from({ length: 6 }, (_, i) => ({
-        color: ['#D8B36A', '#3AE9E0', '#A33A4A'][i % 3],
-        speed: 0.12 + Math.random() * 0.06,
-        radius: 1.6 + i * 0.25,
+      Array.from({ length: 8 }, (_, i) => ({
+        color: ['#D8B36A', '#3AE9E0', '#A33A4A', '#F7F4EE'][i % 4],
+        speed: 0.1 + Math.random() * 0.06,
+        radius: 1.8 + i * 0.212,
         yOff: (Math.random() - 0.5) * 0.8,
         phase: i * 1.05,
       })),
     [],
   );
 
-  const towerData_6 = useMemo(() => {
+  const towerData_7 = useMemo(() => {
     const d = [];
-    for (let x = -4; x <= 4; x += 0.7)
-      for (let z = -3; z <= 3; z += 0.7) {
-        if (Math.random() > 0.5) continue;
+    for (let x = -5; x <= 5; x += 0.6)
+      for (let z = -4; z <= 4; z += 0.6) {
+        if (Math.random() > 0.6) continue;
         d.push({
           x,
           z,
-          h: 0.2 + Math.random() * 0.8,
-          col: ['#10213A', '#F7F4EE', '#D8B36A'][Math.floor(Math.random() * 3)],
+          h: 0.15 + Math.random() * 1.05,
+          col: ['#10213A', '#F7F4EE', '#D8B36A', '#3AE9E0'][
+            Math.floor(Math.random() * 4)
+          ],
         });
       }
     return d;
   }, []);
 
-  const galaxyPos_7 = useMemo(() => {
-    const count = 5000;
+  const galaxyPos_8 = useMemo(() => {
+    const count = 8000;
     const p = new Float32Array(count * 3);
     const c = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const arm = Math.floor(Math.random() * 3);
+      const arm = Math.floor(Math.random() * 4);
       const tt = Math.random() * 5;
       const a = tt * 0.8 + arm * 2.1;
       const sp = 0.2 + tt * 0.06;
@@ -195,12 +206,12 @@ export default function MythScene() {
     return { pos: p, col: c };
   }, []);
 
-  const dustPos_9 = useMemo(() => {
-    const p = new Float32Array(800 * 3);
-    for (let i = 0; i < 800; i++) {
-      p[i * 3] = (Math.random() - 0.5) * 30;
-      p[i * 3 + 1] = (Math.random() - 0.5) * 15;
-      p[i * 3 + 2] = (Math.random() - 0.5) * 35 - 5;
+  const dustPos_10 = useMemo(() => {
+    const p = new Float32Array(1500 * 3);
+    for (let i = 0; i < 1500; i++) {
+      p[i * 3] = (Math.random() - 0.5) * 40;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 45 - 5;
     }
     return p;
   }, []);
@@ -226,73 +237,73 @@ export default function MythScene() {
     const t = state.clock.elapsedTime;
     const g = (c, w) => fadeInOut(raw, c, w);
 
-    if (torusRef_0.current) {
-      torusRef_0.current.rotation.x += delta * 0.08;
-      torusRef_0.current.rotation.y += delta * 0.12;
-      torusRef_0.current.material.opacity = g(0.3, 0.8) * 0.25;
-      torusRef_0.current.material.emissiveIntensity = g(0.3, 0.8) * 0.08;
+    if (torusRef_1.current) {
+      torusRef_1.current.rotation.x += delta * 0.05;
+      torusRef_1.current.rotation.y += delta * 0.08;
+      torusRef_1.current.material.opacity = g(0.3, 0.8) * 0.25;
+      torusRef_1.current.material.emissiveIntensity = g(0.3, 0.8) * 0.08;
     }
 
-    if (sphereRef_1.current) {
-      sphereRef_1.current.rotation.y += delta * 0.04;
-      const _v = g(2.5, 1);
-      sphereRef_1.current.material.opacity = _v * 0.7;
-      sphereRef_1.current.material.emissiveIntensity = _v * 0.2;
-      sphereRef_1.current.scale.setScalar(1 + Math.sin(t * 0.3) * 0.02 * _v);
+    if (sphereRef_2.current) {
+      sphereRef_2.current.rotation.y += delta * 0.03;
+      const _v = g(2.5, 1.2);
+      sphereRef_2.current.material.opacity = _v * 0.7;
+      sphereRef_2.current.material.emissiveIntensity = _v * 0.2;
+      sphereRef_2.current.scale.setScalar(1 + Math.sin(t * 0.3) * 0.02 * _v);
     }
 
-    if (relicSolidRef_4.current) {
-      relicSolidRef_4.current.rotation.y += delta * 0.18;
-      relicSolidRef_4.current.rotation.x = Math.sin(t * 0.3) * 0.08;
+    if (relicSolidRef_5.current) {
+      relicSolidRef_5.current.rotation.y += delta * 0.15;
+      relicSolidRef_5.current.rotation.x = Math.sin(t * 0.3) * 0.08;
       const _v = g(4.5, 1.5);
-      relicSolidRef_4.current.material.opacity = _v;
-      relicSolidRef_4.current.material.emissiveIntensity = _v * 0.3;
-      relicSolidRef_4.current.scale.setScalar(
+      relicSolidRef_5.current.material.opacity = _v;
+      relicSolidRef_5.current.material.emissiveIntensity = _v * 0.3;
+      relicSolidRef_5.current.scale.setScalar(
         1 + Math.sin(t * 0.5) * 0.03 * _v,
       );
     }
-    if (relicWireRef_4.current) {
-      relicWireRef_4.current.rotation.y -= delta * 0.09;
-      relicWireRef_4.current.material.opacity = g(4.5, 1.5) * 0.25;
+    if (relicWireRef_5.current) {
+      relicWireRef_5.current.rotation.y -= delta * 0.075;
+      relicWireRef_5.current.material.opacity = g(4.5, 1.5) * 0.3;
     }
-    if (relicGlowRef_4.current) {
-      relicGlowRef_4.current.material.uniforms.i.value = g(4.5, 1.5) * 1.2;
+    if (relicGlowRef_5.current) {
+      relicGlowRef_5.current.material.uniforms.i.value = g(4.5, 1.5) * 1.5;
     }
 
-    glyphRefs_5.current.forEach((m, i) => {
+    glyphRefs_6.current.forEach((m, i) => {
       if (!m) return;
       const _v = g(4.8, 1.8);
       m.material.opacity = _v * 0.7;
       m.material.emissiveIntensity = _v * 0.3;
       if (!prefersReduced) {
-        const a = t * glyphData_5[i].speed + glyphData_5[i].phase;
-        m.position.x = Math.cos(a) * glyphData_5[i].radius;
-        m.position.z = Math.sin(a) * glyphData_5[i].radius;
+        const a = t * glyphData_6[i].speed + glyphData_6[i].phase;
+        m.position.x = Math.cos(a) * glyphData_6[i].radius;
+        m.position.z = Math.sin(a) * glyphData_6[i].radius;
         m.position.y =
-          glyphData_5[i].yOff +
-          Math.sin(t * 0.5 + glyphData_5[i].phase) * 0.1 * _v;
+          glyphData_6[i].yOff +
+          Math.sin(t * 0.5 + glyphData_6[i].phase) * 0.1 * _v;
         m.rotation.y += delta * 0.3;
       }
     });
 
     const _tv = g(3.8, 1.2);
-    towerRefs_6.current.forEach((m) => {
+    towerRefs_7.current.forEach((m) => {
       if (m) m.material.opacity = _tv * 0.5;
     });
-    towerGlowRefs_6.current.forEach((m) => {
+    towerGlowRefs_7.current.forEach((m) => {
       if (m)
         m.material.opacity =
           _tv * (0.3 + Math.sin(t * 2 + m.position.x) * 0.15);
     });
 
-    if (galaxyRef_7.current) {
+    if (galaxyRef_8.current) {
       const _v = g(5.5, 1);
-      galaxyRef_7.current.material.opacity = _v * 0.7;
-      galaxyRef_7.current.rotation.z = _v * 0.15;
+      galaxyRef_8.current.material.opacity = _v * 0.7;
+      galaxyRef_8.current.rotation.z = _v * 0.15;
     }
 
-    if (dustRef_9.current)
-      dustRef_9.current.material.opacity = 0.06 + g(3, 2) * 0.1;
+    if (dustRef_10.current)
+      dustRef_10.current.material.opacity = 0.06 + g(3, 2) * 0.1;
     if (state.scene.fog) state.scene.fog.density = 0.015 + raw * 0.006;
     if (ambientRef.current) ambientRef.current.intensity = 0.05 + raw * 0.015;
     if (keyLightRef.current) {
@@ -311,113 +322,167 @@ export default function MythScene() {
     <>
       <EffectComposer>
         <Bloom
-          luminanceThreshold={0.1}
+          luminanceThreshold={0.05}
           luminanceSmoothing={0.9}
-          intensity={0.5}
+          intensity={0.4}
           mipmapBlur={true}
         />
+        <Vignette offset={0.25} darkness={0.6} />
       </EffectComposer>
-      <fogExp2 attach="fog" args={['#05070B', 0.015]} />
-      <ambientLight ref={ambientRef} intensity={0.05} color="#F7F4EE" />
+      <fogExp2 attach="fog" args={['#05070B', 0.008]} />
+
+      <Environment preset="studio" background={false} blur={0.3} />
+      <ContactShadows
+        position={[0, -0.4, 0]}
+        opacity={0.5}
+        scale={12}
+        blur={4}
+        far={6}
+      />
+      <ambientLight ref={ambientRef} intensity={0.08} color="#F7F4EE" />
       <directionalLight
         ref={keyLightRef}
-        position={[5, 10, 5]}
-        intensity={0.12}
+        position={[8, 12, 6]}
+        intensity={0.3}
         color={'#D8B36A'}
       />
       <directionalLight
         ref={rimLightRef}
-        position={[-5, 3, -5]}
-        intensity={0.25}
+        position={[-6, 4, -8]}
+        intensity={0.4}
         color={'#3AE9E0'}
       />
+      <hemisphereLight args={['#1a2a4a', '#0a0a12', 0.25]} />
+      <directionalLight
+        position={[0, -5, 8]}
+        intensity={0.12}
+        color={'#A33A4A'}
+      />
 
-      <Float speed={0.4} rotationIntensity={0.08} floatIntensity={0.2}>
-        <mesh ref={torusRef_0} position={[0, 0.5, -3]}>
-          <torusKnotGeometry args={[1.2, 0.4, 180, 24]} />
-          <meshStandardMaterial
+      <mesh
+        ref={floorRef_0}
+        position={[0, -0.6, 0]}
+        rotation={[-1.5707963267948966, 0, 0]}
+      >
+        <planeGeometry args={[25, 25]} />
+        <MeshReflectorMaterial
+          blur={[1024, 1024]}
+          resolution={1024}
+          mixBlur={0.6}
+          mixStrength={0.9}
+          depthScale={1}
+          minDepthThreshold={0.3}
+          maxDepthThreshold={1.3}
+          color="#0a0d14"
+          metalness={0.95}
+          roughness={0.05}
+          reflectorOffset={0.2}
+          mirror={true}
+        />
+      </mesh>
+
+      <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
+        <mesh ref={torusRef_1} position={[0, 0.6, -3.5]}>
+          <torusKnotGeometry args={[1.4, 0.45, 256, 32]} />
+          <meshPhysicalMaterial
             color={new THREE.Color('#D8B36A')}
-            metalness={0.85}
-            roughness={0.08}
+            metalness={0.9}
+            roughness={0.06}
             emissive={new THREE.Color('#D8B36A')}
-            transparent
+            emissiveIntensity={0.15}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            anisotropy={0.5}
+            envMapIntensity={2}
           />
         </mesh>
       </Float>
 
-      <mesh ref={sphereRef_1} position={[0, 0, 0]}>
-        <sphereGeometry args={[0.55, 48, 48]} />
-        <meshStandardMaterial
+      <mesh ref={sphereRef_2} position={[0, 0, 0]}>
+        <sphereGeometry args={[0.6, 64, 64]} />
+        <meshPhysicalMaterial
           color={new THREE.Color('#D8B36A')}
-          metalness={0.9}
-          roughness={0.05}
+          metalness={0.95}
+          roughness={0.03}
           emissive={new THREE.Color('#D8B36A')}
-          transparent
+          emissiveIntensity={0.1}
+          clearcoat={0.8}
+          clearcoatRoughness={0.05}
+          envMapIntensity={2.5}
+          ior={1.5}
+          transmission={0.1}
         />
       </mesh>
       <FresnelGlow
-        ref={sphereGlowRef_1}
+        ref={sphereGlowRef_2}
         position={[0, 0, 0]}
         color="#D8B36A"
-        intensity={0.8}
-        scale={1.15}
+        intensity={1}
+        scale={1.2}
       >
-        <sphereGeometry args={[0.55, 48, 48]} />
+        <sphereGeometry args={[0.6, 64, 64]} />
       </FresnelGlow>
 
       <ParticleRing
-        radius={1.8}
+        radius={2}
         color="#3AE9E0"
-        count={100}
-        speed={0.15}
-        spread={0.2}
-        opacity={0.5}
-        size={0.035}
+        count={200}
+        speed={0.12}
+        spread={0.15}
+        opacity={0.7}
+        size={0.025}
       />
 
       <ParticleRing
-        radius={2.8}
+        radius={3.2}
         color="#D8B36A"
-        count={120}
-        speed={-0.1}
-        spread={0.3}
-        opacity={0.5}
-        size={0.035}
+        count={150}
+        speed={-0.08}
+        spread={0.25}
+        opacity={0.6}
+        size={0.03}
       />
 
-      <mesh ref={relicSolidRef_4} position={[0, 0.3, 0]}>
-        <icosahedronGeometry args={[0.45, 2]} />
-        <meshStandardMaterial
+      <mesh ref={relicSolidRef_5} position={[0, 0.4, 0]}>
+        <icosahedronGeometry args={[0.5, 3]} />
+        <meshPhysicalMaterial
           color={new THREE.Color('#D8B36A')}
-          metalness={0.9}
-          roughness={0.05}
+          metalness={0.95}
+          roughness={0.04}
           emissive={new THREE.Color('#D8B36A')}
-          transparent
+          emissiveIntensity={0.3}
+          clearcoat={1}
+          clearcoatRoughness={0.08}
+          anisotropy={0.8}
+          anisotropyRotation={0.5}
+          envMapIntensity={2}
         />
       </mesh>
       <FresnelGlow
-        ref={relicGlowRef_4}
-        position={[0, 0.3, 0]}
+        ref={relicGlowRef_5}
+        position={[0, 0.4, 0]}
         color="#D8B36A"
-        intensity={1.2}
-        scale={1.3}
+        intensity={1.5}
+        scale={1.4}
       >
-        <icosahedronGeometry args={[0.45, 2]} />
+        <icosahedronGeometry args={[0.5, 3]} />
       </FresnelGlow>
-      <mesh ref={relicWireRef_4} position={[0, 0.3, 0]} scale={1.5}>
-        <icosahedronGeometry args={[0.45, 0]} />
+      <mesh ref={relicWireRef_5} position={[0, 0.4, 0]} scale={1.6}>
+        <icosahedronGeometry args={[0.5, 0]} />
         <meshStandardMaterial
           color={new THREE.Color('#3AE9E0')}
+          metalness={0.5}
+          roughness={0.3}
           transparent
           wireframe
-          opacity={0.25}
+          opacity={0.3}
         />
       </mesh>
 
-      {glyphData_5.map((d, i) => (
+      {glyphData_6.map((d, i) => (
         <Float key={i} speed={0.2} floatIntensity={0.1}>
           <mesh
-            ref={(el) => (glyphRefs_5.current[i] = el)}
+            ref={(el) => (glyphRefs_6.current[i] = el)}
             position={[
               Math.cos(d.phase) * d.radius,
               d.yOff,
@@ -431,15 +496,16 @@ export default function MythScene() {
               transparent
               metalness={0.7}
               roughness={0.2}
+              envMapIntensity={0.5}
             />
           </mesh>
         </Float>
       ))}
 
-      {towerData_6.map((b, i) => (
+      {towerData_7.map((b, i) => (
         <mesh
           key={i}
-          ref={(el) => (towerRefs_6.current[i] = el)}
+          ref={(el) => (towerRefs_7.current[i] = el)}
           position={[b.x, b.h / 2, b.z]}
         >
           <boxGeometry args={[0.12, b.h, 0.12]} />
@@ -451,12 +517,12 @@ export default function MythScene() {
           />
         </mesh>
       ))}
-      {towerData_6
+      {towerData_7
         .filter((t) => t.h > 0.4)
         .map((b, i) => (
           <mesh
             key={'w' + i}
-            ref={(el) => (towerGlowRefs_6.current[i] = el)}
+            ref={(el) => (towerGlowRefs_7.current[i] = el)}
             position={[b.x, b.h * 0.8, b.z + 0.065]}
           >
             <planeGeometry args={[0.03, 0.015]} />
@@ -464,23 +530,23 @@ export default function MythScene() {
           </mesh>
         ))}
 
-      <points ref={galaxyRef_7}>
+      <points ref={galaxyRef_8}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={5000}
-            array={galaxyPos_7.pos}
+            count={8000}
+            array={galaxyPos_8.pos}
             itemSize={3}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={5000}
-            array={galaxyPos_7.col}
+            count={8000}
+            array={galaxyPos_8.col}
             itemSize={3}
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.022}
+          size={0.018}
           vertexColors
           transparent
           opacity={0}
@@ -490,48 +556,68 @@ export default function MythScene() {
         />
       </points>
 
-      <mesh position={[0, 2, -1]} rotation={[0.2, 0, 0]}>
+      <mesh position={[0, 2.5, -1.5]} rotation={[0.2, 0, 0]}>
         <coneGeometry args={[0.03, 6, 4]} />
         <meshBasicMaterial
           color="#D8B36A"
           transparent
-          opacity={0.05}
+          opacity={0.08}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
-      <mesh position={[1.5, 2, -1]} rotation={[0.25, 0.3, 0]}>
+      <mesh position={[2, 2.5, -1]} rotation={[0.25, 0.3, 0]}>
         <coneGeometry args={[0.03, 6, 4]} />
         <meshBasicMaterial
           color="#3AE9E0"
           transparent
-          opacity={0.05}
+          opacity={0.08}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
-      <mesh position={[-1.5, 2, -1]} rotation={[0.25, -0.3, 0]}>
+      <mesh position={[-2, 2.5, -1]} rotation={[0.25, -0.3, 0]}>
         <coneGeometry args={[0.03, 6, 4]} />
         <meshBasicMaterial
           color="#A33A4A"
           transparent
-          opacity={0.05}
+          opacity={0.08}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[1, 2.5, 1]} rotation={[0.2, 0, 0]}>
+        <coneGeometry args={[0.03, 6, 4]} />
+        <meshBasicMaterial
+          color="#D8B36A"
+          transparent
+          opacity={0.08}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[-1, 2.5, 1]} rotation={[0.2, 0, 0]}>
+        <coneGeometry args={[0.03, 6, 4]} />
+        <meshBasicMaterial
+          color="#3AE9E0"
+          transparent
+          opacity={0.08}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      <points ref={dustRef_9}>
+      <points ref={dustRef_10}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={800}
-            array={dustPos_9}
+            count={1500}
+            array={dustPos_10}
             itemSize={3}
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.012}
+          size={0.008}
           color="#F7F4EE"
           transparent
           opacity={0.06}
@@ -539,6 +625,16 @@ export default function MythScene() {
           depthWrite={false}
         />
       </points>
+
+      <Stars
+        radius={60}
+        depth={70}
+        count={5000}
+        factor={4}
+        saturation={0.3}
+        fade
+        speed={0.2}
+      />
     </>
   );
 }
