@@ -4,34 +4,26 @@ import { COLORS, TAGLINES } from '../constants/brand';
 export default function Footer() {
   return (
     <footer
+      data-section="footer"
       style={{
         position: 'relative',
-        padding: '120px 40px 60px',
+        padding: '100px 40px 50px',
         textAlign: 'center',
-        background: COLORS.void,
         borderTop: `1px solid ${COLORS.gold}11`,
       }}
     >
       <div style={{ maxWidth: 700, margin: '0 auto' }}>
-        <div
-          style={{
-            width: 40,
-            height: 1,
-            background: COLORS.gold,
-            margin: '0 auto 40px',
-            opacity: 0.4,
-          }}
-        />
+        <div style={{ width: 32, height: 1, background: COLORS.gold, margin: '0 auto 32px', opacity: 0.3 }} />
 
         <p
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Space Grotesk Variable', sans-serif",
             fontStyle: 'italic',
-            fontSize: '13px',
+            fontSize: '12px',
             color: COLORS.gold,
             marginBottom: 16,
-            opacity: 0.6,
-            letterSpacing: '0.15em',
+            opacity: 0.5,
+            letterSpacing: '0.1em',
           }}
         >
           {TAGLINES.secondary}
@@ -39,12 +31,12 @@ export default function Footer() {
 
         <h3
           style={{
-            fontSize: 'clamp(28px, 4vw, 48px)',
+            fontSize: 'clamp(24px, 3.5vw, 40px)',
             color: COLORS.ivory,
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Space Grotesk Variable', sans-serif",
             fontWeight: 600,
             lineHeight: 1.2,
-            marginBottom: 32,
+            marginBottom: 28,
             letterSpacing: '-0.02em',
           }}
         >
@@ -53,10 +45,12 @@ export default function Footer() {
 
         <p
           style={{
-            fontSize: '12px',
-            color: 'rgba(247,244,238,0.2)',
-            letterSpacing: '0.2em',
+            fontSize: '10px',
+            color: 'rgba(247,244,238,0.15)',
+            letterSpacing: '0.25em',
             textTransform: 'uppercase',
+            fontFamily: "'Space Grotesk Variable', sans-serif",
+            fontWeight: 400,
           }}
         >
           MYTH Ω — The Culture Engine

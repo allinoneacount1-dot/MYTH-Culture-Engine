@@ -1,59 +1,50 @@
 import React, { useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ScrollControls, Scroll } from '@react-three/drei';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useScrollStore } from './stores/scroll';
 import { COLORS } from './constants/brand';
 import Navigation from './components/Navigation';
-import Chapter from './components/Chapter';
 import Hero from './components/Hero';
-import Logo from './components/Logo';
+import Section from './components/Section';
 import Footer from './components/Footer';
-import Scene1 from './components/scenes/Scene1';
-import Scene2 from './components/scenes/Scene2';
-import Scene3 from './components/scenes/Scene3';
-import Scene4 from './components/scenes/Scene4';
-import Scene5 from './components/scenes/Scene5';
-import Scene6 from './components/scenes/Scene6';
+import Scene from './components/Scene';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const scenes = [Scene1, Scene2, Scene3, Scene4, Scene5, Scene6];
+const CHAPTER_COUNT = 6;
 
 export default function App() {
-  const containerRef = useRef(null);
-  const lenisRef = useRef(null);
+  const rootRef = useRef(null);
+  const setProgress = useScrollStore((s) => s.setProgress);
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.8,
+      duration: 1.6,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.6,
+      wheelMultiplier: 0.5,
     });
-    lenisRef.current = lenis;
 
-    lenis.on('scroll', ScrollTrigger.update);
+    lenis.on('scroll', (e) => {
+      const maxScroll = e.limit || 1;
+      setProgress(Math.min(1, e.scroll / maxScroll));
+      ScrollTrigger.update();
+    });
+
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
 
-    ScrollTrigger.scrollerProxy(containerRef.current, {
+    ScrollTrigger.scrollerProxy(rootRef.current, {
       scrollTop(value) {
-        if (arguments.length) {
-          lenis.scrollTo(value, { immediate: true });
-        }
+        if (arguments.length) lenis.scrollTo(value, { immediate: true });
         return lenis.scroll;
       },
       getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
       },
-      pinType: containerRef.current.style.transform ? 'transform' : 'fixed',
+      pinType: rootRef.current?.style.transform ? 'transform' : 'fixed',
     });
 
     ScrollTrigger.refresh();
@@ -62,23 +53,40 @@ export default function App() {
       lenis.destroy();
       gsap.ticker.remove((t) => lenis.raf(t * 1000));
     };
-  }, []);
+  }, [setProgress]);
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', background: COLORS.void }}>
-      <Navigation />
-      <Hero />
-      <Logo />
-
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        {scenes.map((Scene, i) => (
-          <Chapter key={i} index={i}>
-            <Scene />
-          </Chapter>
-        ))}
+    <div ref={rootRef} style={{ position: 'relative', background: COLORS.void, minHeight: '100vh' }}>
+      {/* Persistent 3D canvas — fixed behind content */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+        <Canvas
+          camera={{ position: [0, 1.5, 10], fov: 45 }}
+          style={{ width: '100%', height: '100%' }}
+          gl={{ antialias: true, alpha: false }}
+          dpr={[1, 1.5]}
+        >
+          <Scene />
+        </Canvas>
       </div>
 
-      <Footer />
+      {/* HTML content overlay */}
+      <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <Navigation />
+        </div>
+
+        <Hero />
+
+        {Array.from({ length: CHAPTER_COUNT }, (_, i) => (
+          <div key={i} data-section={i} style={{ pointerEvents: 'auto' }}>
+            <Section index={i} />
+          </div>
+        ))}
+
+        <div style={{ pointerEvents: 'auto' }}>
+          <Footer />
+        </div>
+      </div>
     </div>
   );
 }

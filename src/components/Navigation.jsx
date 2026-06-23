@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { COLORS, CHAPTERS } from '../constants/brand';
 
-const linkStyle = {
-  color: COLORS.gold,
+const linkBase = {
+  color: COLORS.ivory,
   textDecoration: 'none',
-  fontSize: '11px',
+  fontSize: '10px',
   fontWeight: 500,
   letterSpacing: '0.15em',
   textTransform: 'uppercase',
-  transition: 'opacity 0.3s',
+  background: 'none',
+  border: 'none',
+  fontFamily: "'Space Grotesk Variable', sans-serif",
   cursor: 'pointer',
+  transition: 'opacity 0.3s',
+  padding: 0,
 };
 
 export default function Navigation() {
@@ -17,18 +21,18 @@ export default function Navigation() {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 100);
-      const sections = document.querySelectorAll('[data-chapter]');
-      let current = 0;
+    const handle = () => {
+      setScrolled(window.scrollY > 80);
+      const sections = document.querySelectorAll('[data-section]');
+      let cur = 0;
       sections.forEach((s, i) => {
-        const rect = s.getBoundingClientRect();
-        if (rect.top < window.innerHeight / 2) current = i;
+        const r = s.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.4) cur = i;
       });
-      setActive(current);
+      setActive(cur);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handle, { passive: true });
+    return () => window.removeEventListener('scroll', handle);
   }, []);
 
   return (
@@ -39,35 +43,28 @@ export default function Navigation() {
         left: 0,
         right: 0,
         zIndex: 100,
-        padding: '24px 40px',
+        padding: '20px 40px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: scrolled ? 'rgba(5,7,11,0.85)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        transition: 'background 0.6s, backdrop-filter 0.6s',
+        background: scrolled ? 'rgba(5,7,11,0.8)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(16px)' : 'none',
+        transition: 'background 0.5s, backdrop-filter 0.5s',
       }}
     >
-      <div style={{ ...linkStyle, fontSize: '13px', fontWeight: 600, letterSpacing: '0.2em' }}>
-        MYTH
-      </div>
+      <span style={{ ...linkBase, fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', cursor: 'default' }}>
+        MYTH Ω
+      </span>
 
-      <div style={{ display: 'flex', gap: '28px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
         {CHAPTERS.map((ch, i) => (
           <button
             key={ch.id}
             onClick={() => {
-              const el = document.querySelector(`[data-chapter="${i}"]`);
+              const el = document.querySelector(`[data-section="${i}"]`);
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
-            style={{
-              ...linkStyle,
-              opacity: active === i ? 1 : 0.4,
-              background: 'none',
-              border: 'none',
-              font: 'inherit',
-              padding: 0,
-            }}
+            style={{ ...linkBase, opacity: active === i ? 1 : 0.3 }}
           >
             {ch.title}
           </button>

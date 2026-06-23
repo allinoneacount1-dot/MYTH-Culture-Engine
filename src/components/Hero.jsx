@@ -12,33 +12,20 @@ export default function Hero() {
         justifyContent: 'center',
         alignItems: 'center',
         textAlign: 'center',
-        background: COLORS.void,
-        overflow: 'hidden',
+        pointerEvents: 'none',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: '30%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '1px',
-          height: '20vh',
-          background: `linear-gradient(to bottom, transparent, ${COLORS.gold}44, transparent)`,
-        }}
-      />
-
-      <div style={{ maxWidth: 900, padding: '0 24px', position: 'relative' }}>
+      <div style={{ maxWidth: 900, padding: '0 24px' }}>
         <p
           style={{
-            fontFamily: "'Playfair Display', serif",
-            fontStyle: 'italic',
-            fontSize: '14px',
+            fontFamily: "'Space Grotesk Variable', sans-serif",
+            fontSize: '12px',
             color: COLORS.gold,
-            letterSpacing: '0.3em',
+            letterSpacing: '0.35em',
             textTransform: 'uppercase',
-            marginBottom: 32,
-            opacity: 0.7,
+            marginBottom: 28,
+            opacity: 0.5,
+            fontWeight: 500,
           }}
         >
           {TAGLINES.subtitle}
@@ -46,13 +33,14 @@ export default function Hero() {
 
         <h1
           style={{
-            fontSize: 'clamp(48px, 10vw, 120px)',
+            fontSize: 'clamp(44px, 9vw, 100px)',
             fontWeight: 600,
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Space Grotesk Variable', sans-serif",
             color: COLORS.ivory,
             lineHeight: 1.05,
-            marginBottom: 40,
+            marginBottom: 36,
             letterSpacing: '-0.03em',
+            textShadow: '0 0 80px rgba(216,179,106,0.08)',
           }}
         >
           Build What<br />
@@ -62,13 +50,14 @@ export default function Hero() {
 
         <p
           style={{
-            fontSize: '16px',
-            color: 'rgba(247,244,238,0.5)',
-            maxWidth: 600,
+            fontSize: '14px',
+            color: 'rgba(247,244,238,0.4)',
+            maxWidth: 560,
             margin: '0 auto',
             lineHeight: 1.7,
             fontWeight: 300,
             letterSpacing: '0.02em',
+            fontFamily: "'Inter Variable', sans-serif",
           }}
         >
           The first Culture Engine. Infrastructure for digital civilizations.
@@ -78,7 +67,7 @@ export default function Hero() {
       <div
         style={{
           position: 'absolute',
-          bottom: 40,
+          bottom: 36,
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
@@ -87,16 +76,18 @@ export default function Hero() {
           gap: 8,
         }}
       >
-        <span style={{ color: COLORS.gold, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.4 }}>
-          Scroll to explore
+        <span style={{
+          color: COLORS.gold, fontSize: '9px', letterSpacing: '0.25em',
+          textTransform: 'uppercase', opacity: 0.3,
+          fontFamily: "'Space Grotesk Variable', sans-serif",
+          fontWeight: 500,
+        }}>
+          Scroll
         </span>
-        <div
-          style={{
-            width: 1,
-            height: 30,
-            background: `linear-gradient(to bottom, ${COLORS.gold}, transparent)`,
-          }}
-        />
+        <div style={{
+          width: 1, height: 24,
+          background: `linear-gradient(to bottom, ${COLORS.gold}, transparent)`,
+        }} />
       </div>
     </section>
   );
